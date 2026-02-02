@@ -1,150 +1,104 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Paws & Preferences</title>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Paws & Preferences</title>
 
-  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
-  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
-  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+<script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
 
-  <style>
-    body {
-      margin: 0;
-      font-family: system-ui, Arial, sans-serif;
-      background: #f5f5f5;
-      display: flex;
-      justify-content: center;
-      height: 100vh;
-    }
+<style>
+body {
+  margin: 0;
+  font-family: system-ui, Arial, sans-serif;
+  background: #f5f5f5;
+  display: flex;
+  justify-content: center;
+  height: 100vh;
+  overflow-x: hidden;
+}
 
-    #root {
-      width: 100%;
-      max-width: 420px;
-    }
+#root {
+  width: 100%;
+  max-width: 420px;
+}
 
-    h1 {
-      text-align: center;
-      margin: 16px 0 4px;
-    }
+h1 { text-align: center; margin: 16px 0 4px; }
+.note { text-align: center; font-size: 14px; color: #666; margin-bottom: 6px; }
+.progress { text-align: center; font-size: 14px; margin-bottom: 4px; }
+.liked-count { text-align: center; font-size: 14px; font-weight: bold; color: #2ecc71; margin-bottom: 8px; }
+.like-text { color: #2ecc71; font-weight: bold; }
+.dislike-text { color: #e74c3c; font-weight: bold; }
 
-    .note {
-      text-align: center;
-      font-size: 14px;
-      color: #666;
-      margin-bottom: 6px;
-    }
+.stack {
+  position: relative;
+  height: 65vh;
+  overflow: hidden;
+  touch-action: pan-y;
+}
 
-    .progress {
-      text-align: center;
-      font-size: 14px;
-      margin-bottom: 4px;
-    }
+.card {
+  position: absolute;
+  top: 0;
+  left: 5%;
+  width: 90%;
+  height: 100%;
+  border-radius: 16px;
+  background-size: cover;
+  background-position: center;
+  box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+  cursor: grab;
+  user-select: none;
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
 
-    .liked-count {
-      text-align: center;
-      font-size: 14px;
-      font-weight: bold;
-      color: #2ecc71;
-      margin-bottom: 8px;
-    }
+.card.dragging {
+  transition: none;
+  cursor: grabbing;
+}
 
-    .like-text { color: #2ecc71; font-weight: bold; }
-    .dislike-text { color: #e74c3c; font-weight: bold; }
+.label {
+  position: absolute;
+  top: 20px;
+  padding: 8px 16px;
+  font-size: 22px;
+  font-weight: bold;
+  border-radius: 8px;
+  opacity: 0;
+}
 
-    /* Shared container */
-    .stack {
-      position: relative;
-      height: 65vh;
-      transition: opacity 0.4s ease, transform 0.4s ease;
-      overflow: hidden;
-    }
+.like { left: 20px; color: #2ecc71; border: 3px solid #2ecc71; }
+.dislike { right: 20px; color: #e74c3c; border: 3px solid #e74c3c; }
 
-    .fade-out {
-      opacity: 0;
-      transform: scale(0.98);
-      pointer-events: none;
-    }
+button {
+  width: 100%;
+  margin-top: 12px;
+  padding: 10px;
+  border: none;
+  border-radius: 8px;
+  background: #3498db;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+}
 
-    .fade-in {
-      opacity: 1;
-      transform: scale(1);
-    }
+.stack .card:not(:last-child) { transform: scale(0.95); }
 
-    .card {
-      position: absolute;
-      top: 0;
-      left: 5%;
-      width: 90%;
-      height: 100%;
-      border-radius: 16px;
-      background-size: cover;
-      background-position: center;
-      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
-      transition: transform 0.3s ease, opacity 0.3s ease, box-shadow 0.3s ease;
-    }
+.summary-grid {
+  display: grid;
+  grid-template-rows: repeat(2, auto);
+  grid-auto-flow: column;
+  grid-auto-columns: 1fr;
+  gap: 10px;
+  margin-top: 10px;
+}
 
-    .label {
-      position: absolute;
-      top: 20px;
-      padding: 8px 16px;
-      font-size: 22px;
-      font-weight: bold;
-      border-radius: 8px;
-      opacity: 0;
-    }
+.summary-grid img { width: 100%; border-radius: 12px; }
 
-    .like {
-      left: 20px;
-      color: #2ecc71;
-      border: 3px solid #2ecc71;
-    }
-
-    .dislike {
-      right: 20px;
-      color: #e74c3c;
-      border: 3px solid #e74c3c;
-    }
-
-    button {
-      width: 100%;
-      margin-top: 12px;
-      padding: 10px;
-      border: none;
-      border-radius: 8px;
-      background: #3498db;
-      color: white;
-      font-size: 16px;
-      cursor: pointer;
-    }
-
-    /* Hover peek for top card */
-    .stack .card:not(:last-child) {
-      transform: scale(0.95);
-    }
-
-    .stack .card:last-child:hover {
-      transform: translateY(-15px);
-      box-shadow: 0 16px 35px rgba(0,0,0,0.3);
-      cursor: pointer;
-    }
-
-    /* Summary grid — 2 rows, left → right */
-    .summary-grid {
-      display: grid;
-      grid-template-rows: repeat(2, auto);
-      grid-auto-flow: column;
-      grid-auto-columns: 1fr;
-      gap: 10px;
-      margin-top: 10px;
-    }
-
-    .summary-grid img {
-      width: 100%;
-      border-radius: 12px;
-    }
-  </style>
+.fade-in { opacity: 1; transform: scale(1); transition: opacity 0.4s ease, transform 0.4s ease; }
+</style>
 </head>
 <body>
 
@@ -154,38 +108,35 @@
 function App() {
   const TOTAL = 10;
 
+  const [cats, setCats] = React.useState(createCats());
+  const [liked, setLiked] = React.useState([]);
+  const [history, setHistory] = React.useState([]);
+  const [drag, setDrag] = React.useState({ x: 0, y: 0, isDragging: false });
+  const [swipeDir, setSwipeDir] = React.useState(null);
+
+  const topCat = cats[cats.length - 1];
+  const progress = TOTAL - cats.length + 1;
+
+  const touchStartXRef = React.useRef(0);
+  const touchStartYRef = React.useRef(0);
+
   function createCats() {
     return Array.from({ length: TOTAL }, (_, i) =>
       `https://cataas.com/cat?random=${i}`
     );
   }
 
-  const [cats, setCats] = React.useState(createCats());
-  const [liked, setLiked] = React.useState([]);
-  const [history, setHistory] = React.useState([]);
-  const [swipeDir, setSwipeDir] = React.useState(null);
-
-  const topCat = cats[cats.length - 1];
-  const progress = TOTAL - cats.length + 1;
-
-  // Track touch start for mobile swipe
-  const touchStartXRef = React.useRef(0);
-
   function swipe(direction) {
     if (!topCat) return;
-
     setSwipeDir(direction);
 
     setTimeout(() => {
       setHistory([...history, cats]);
       setCats(cats.slice(0, -1));
-
-      if (direction === "right") {
-        setLiked([...liked, topCat]);
-      }
-
+      if (direction === "right") setLiked([...liked, topCat]);
       setSwipeDir(null);
-    }, 200);
+      setDrag({ x: 0, y: 0, isDragging: false });
+    }, 300);
   }
 
   function undo() {
@@ -200,11 +151,12 @@ function App() {
     setCats(createCats());
     setLiked([]);
     setHistory([]);
+    setDrag({ x: 0, y: 0, isDragging: false });
     setSwipeDir(null);
   }
 
   React.useEffect(() => {
-    // Keyboard events
+    // Keyboard
     function handleKey(e) {
       if (e.key === "ArrowRight") swipe("right");
       if (e.key === "ArrowLeft") swipe("left");
@@ -212,29 +164,31 @@ function App() {
     }
     window.addEventListener("keydown", handleKey);
 
-    // Touch events for mobile swipe
-    function handleTouchStart(e) {
-      touchStartXRef.current = e.touches[0].clientX;
-    }
+    return () => window.removeEventListener("keydown", handleKey);
+  }, [cats, history, topCat]);
 
-    function handleTouchEnd(e) {
-      const touchEndX = e.changedTouches[0].clientX;
-      const diff = touchEndX - touchStartXRef.current;
-      const threshold = 50;
+  // Touch & drag
+  function handleDragStart(e) {
+    const x = e.type.includes("touch") ? e.touches[0].clientX : e.clientX;
+    const y = e.type.includes("touch") ? e.touches[0].clientY : e.clientY;
+    touchStartXRef.current = x;
+    touchStartYRef.current = y;
+    setDrag({ x: 0, y: 0, isDragging: true });
+  }
 
-      if (diff > threshold) swipe("right");
-      else if (diff < -threshold) swipe("left");
-    }
+  function handleDragMove(e) {
+    if (!drag.isDragging) return;
+    const x = e.type.includes("touch") ? e.touches[0].clientX : e.clientX;
+    const y = e.type.includes("touch") ? e.touches[0].clientY : e.clientY;
+    setDrag({ x: x - touchStartXRef.current, y: y - touchStartYRef.current, isDragging: true });
+  }
 
-    window.addEventListener("touchstart", handleTouchStart);
-    window.addEventListener("touchend", handleTouchEnd);
-
-    return () => {
-      window.removeEventListener("keydown", handleKey);
-      window.removeEventListener("touchstart", handleTouchStart);
-      window.removeEventListener("touchend", handleTouchEnd);
-    };
-  }, [cats, swipe, history, topCat]);
+  function handleDragEnd() {
+    const threshold = 80;
+    if (drag.x > threshold) swipe("right");
+    else if (drag.x < -threshold) swipe("left");
+    else setDrag({ x: 0, y: 0, isDragging: false });
+  }
 
   return (
     <div>
@@ -242,7 +196,7 @@ function App() {
 
       <div className="note">
         👉 Swipe right to <span className="like-text">Like</span> | 👈 Swipe left to <span className="dislike-text">Dislike</span><br/>
-        ⌨️ ← → to swipe, Z to undo, or swipe on mobile
+        ⌨️ ← → to swipe, Z to undo, drag/swipe on mobile
       </div>
 
       {cats.length > 0 && (
@@ -255,30 +209,34 @@ function App() {
       {/* CARD STACK */}
       {cats.length > 0 && (
         <div className="stack fade-in">
-          {cats.map((cat, i) => (
-            <div
-              key={cat}
-              className="card"
-              style={{
-                backgroundImage: `url(${cat})`,
-                zIndex: i
-              }}
-            >
-              <div
-                className="label like"
-                style={{ opacity: swipeDir === "right" && i === cats.length - 1 ? 1 : 0 }}
-              >
-                LIKE
-              </div>
+          {cats.map((cat, i) => {
+            const isTop = i === cats.length - 1;
+            const style = isTop
+              ? { transform: `translate(${drag.x}px, ${drag.y}px) rotate(${drag.x/10}deg)` }
+              : {};
 
+            return (
               <div
-                className="label dislike"
-                style={{ opacity: swipeDir === "left" && i === cats.length - 1 ? 1 : 0 }}
+                key={cat}
+                className={`card ${isTop && drag.isDragging ? "dragging" : ""}`}
+                style={{
+                  backgroundImage: `url(${cat})`,
+                  zIndex: i,
+                  ...style
+                }}
+                onMouseDown={isTop ? handleDragStart : null}
+                onMouseMove={isTop ? handleDragMove : null}
+                onMouseUp={isTop ? handleDragEnd : null}
+                onMouseLeave={isTop ? handleDragEnd : null}
+                onTouchStart={isTop ? handleDragStart : null}
+                onTouchMove={isTop ? handleDragMove : null}
+                onTouchEnd={isTop ? handleDragEnd : null}
               >
-                NOPE
+                <div className="label like" style={{ opacity: (drag.x > 50 || swipeDir === "right") ? 1 : 0 }}>LIKE</div>
+                <div className="label dislike" style={{ opacity: (drag.x < -50 || swipeDir === "left") ? 1 : 0 }}>NOPE</div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -290,13 +248,9 @@ function App() {
       {cats.length === 0 && (
         <div className="stack fade-in">
           <h2>You liked {liked.length} cats 😺</h2>
-
           <div className="summary-grid">
-            {liked.map(src => (
-              <img key={src} src={src} alt="Liked cat" />
-            ))}
+            {liked.map(src => <img key={src} src={src} alt="Liked cat" />)}
           </div>
-
           <button onClick={replay}>Replay</button>
         </div>
       )}
@@ -306,9 +260,10 @@ function App() {
 
 ReactDOM.createRoot(document.getElementById("root")).render(<App />);
 </script>
-
 </body>
 </html>
+
+
 
 
 
