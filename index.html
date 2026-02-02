@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Paws & Preferences</title>
+
+  <script src="https://unpkg.com/react@18/umd/react.development.js"></script>
+  <script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+  <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+  <style>
+    body {
+      margin: 0;
+      font-family: system-ui, Arial, sans-serif;
+      background: #f5f5f5;
+      display: flex;
+      justify-content: center;
+      height: 100vh;
+    }
+
+    #root {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    h1 {
+      text-align: center;
+      margin: 16px 0 4px;
+    }
+
+    .note {
+      text-align: center;
+      font-size: 14px;
+      color: #666;
+      margin-bottom: 6px;
+    }
+
+    .progress {
+      text-align: center;
+      font-size: 14px;
+      margin-bottom: 4px;
+    }
+
+    .liked-count {
+      text-align: center;
+      font-size: 14px;
+      font-weight: bold;
+      color: #2ecc71;
+      margin-bottom: 8px;
+    }
+
+    .like-text { color: #2ecc71; font-weight: bold; }
+    .dislike-text { color: #e74c3c; font-weight: bold; }
+
+    /* Shared container */
+    .stack {
+      position: relative;
+      height: 65vh;
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+
+    .fade-out {
+      opacity: 0;
+      transform: scale(0.98);
+      pointer-events: none;
+    }
+
+    .fade-in {
+      opacity: 1;
+      transform: scale(1);
+    }
+
+    .card {
+      position: absolute;
+      top: 0;
+      left: 5%;
+      width: 90%;
+      height: 100%;
+      border-radius: 16px;
+      background-size: cover;
+      background-position: center;
+      box-shadow: 0 12px 30px rgba(0,0,0,0.2);
+      transition: transform 0.3s ease, opacity 0.3s ease;
+    }
+
+    .label {
+      position: absolute;
+      top: 20px;
+      padding: 8px 16px;
+      font-size: 22px;
+      font-weight: bold;
+      border-radius: 8px;
+      opacity: 0;
+    }
+
+    .like {
+      left: 20px;
+      color: #2ecc71;
+      border: 3px solid #2ecc71;
+    }
+
+    .dislike {
+      right: 20px;
+      color: #e74c3c;
+      border: 3px solid #e74c3c;
+    }
+
+    button {
+      width: 100%;
+      margin-top: 12px;
+      padding: 10px;
+      border: none;
+      border-radius: 8px;
+      background: #3498db;
+      color: white;
+      font-size: 16px;
+      cursor: pointer;
+    }
+
+    /* Summary grid — 2 rows, left → right, overlapping for hover peek */
+    .summary-grid {
+      display: grid;
+      grid-template-rows: repeat(2, auto);
+      grid-auto-flow: column;
+      grid-auto-columns: 1fr;
+      gap: 0;                 /* remove gaps for peek */
+      overflow: hidden;
+      margin-top: 10px;
+    }
+
+    .summary-grid img {
+      width: 100%;
+      border-radius: 12px;
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+      position: relative;
+      margin-right: -18%;      /* overlap to reveal next */
+      z-index: 1;
+      cursor: pointer;
+    }
+
+    .summary-grid img:hover {
+      transform: translateX(-18%);
+      z-index: 2;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.25);
+    }
+
+  </style>
+</head>
+<body>
+
+<div id="root"></div>
+
+<script type="text/babel">
+function App() {
+  const TOTAL = 10;
+
+  function createCats() {
+    return Array.from({ length: TOTAL }, (_, i) =>
+      `https://cataas.com/cat?random=${i}`
+    );
+  }
+
+  const [cats, setCats] = React.useState(createCats());
+  const [liked, setLiked] = React.useState([]);
+  const [history, setHistory] = React.useState([]);
+  const [swipeDir, setSwipeDir] = React.useState(null);
+
+  const topCat = cats[cats.length - 1];
+  const progress = TOTAL - cats.length + 1;
+
+  function swipe(direction) {
+    if (!topCat) return;
+
+    setSwipeDir(direction);
+
+    setTimeout(() => {
+      setHistory([...history, cats]);
+      setCats(cats.slice(0, -1));
+
+      if (direction === "right") {
+        setLiked([...liked, topCat]);
+      }
+
+      setSwipeDir(null);
+    }, 200);
+  }
+
+  function undo() {
+    if (!history.length) return;
+    const prev = history[history.length - 1];
+    setCats(prev);
+    setHistory(history.slice(0, -1));
+    setLiked(liked.slice(0, prev.length < cats.length ? -1 : liked.length));
+  }
+
+  function replay() {
+    setCats(createCats());
+    setLiked([]);
+    setHistory([]);
+    setSwipeDir(null);
+  }
+
+  React.useEffect(() => {
+    function handleKey(e) {
+      if (e.key === "ArrowRight") swipe("right");
+      if (e.key === "ArrowLeft") swipe("left");
+      if (e.key === "z") undo();
+    }
+    window.addEventListener("keydown", handleKey);
+    return () => window.removeEventListener("keydown", handleKey);
+  });
+
+  return (
+    <div>
+      <h1>🐾 Paws & Preferences</h1>
+
+      <div className="note">
+        👉 Swipe right to <span className="like-text">Like</span> | 👈 Swipe left to <span className="dislike-text">Dislike</span><br/>
+        ⌨️ ← → to swipe, Z to undo
+      </div>
+
+      {cats.length > 0 && (
+        <>
+          <div className="progress">{progress} / {TOTAL}</div>
+          <div className="liked-count">❤️ Liked: {liked.length}</div>
+        </>
+      )}
+
+      {/* CARD STACK */}
+      {cats.length > 0 && (
+        <div className="stack fade-in">
+          {cats.map((cat, i) => (
+            <div
+              key={cat}
+              className="card"
+              style={{
+                backgroundImage: `url(${cat})`,
+                zIndex: i
+              }}
+            >
+              <div
+                className="label like"
+                style={{ opacity: swipeDir === "right" && i === cats.length - 1 ? 1 : 0 }}
+              >
+                LIKE
+              </div>
+
+              <div
+                className="label dislike"
+                style={{ opacity: swipeDir === "left" && i === cats.length - 1 ? 1 : 0 }}
+              >
+                NOPE
+              </div>
+            </div>
+          ))}
+        </div>
+      )}
+
+      {cats.length > 0 && (
+        <button onClick={undo}>Undo Swipe</button>
+      )}
+
+      {/* SUMMARY */}
+      {cats.length === 0 && (
+        <div className="stack fade-in">
+          <h2>You liked {liked.length} cats 😺</h2>
+
+          <div className="summary-grid">
+            {liked.map(src => (
+              <img key={src} src={src} alt="Liked cat" />
+            ))}
+          </div>
+
+          <button onClick={replay}>Replay</button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+ReactDOM.createRoot(document.getElementById("root")).render(<App />);
+</script>
+
+</body>
+</html>
+
+
+
+
+
+
+
+
+
