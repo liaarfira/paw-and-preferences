@@ -4,7 +4,7 @@
 <meta charset="UTF-8" />
 
 <meta name="viewport"
-content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 
 <title>Paws & Preferences</title>
 
@@ -17,70 +17,75 @@ href="https://cdn-icons-png.flaticon.com/512/616/616430.png">
 
 <style>
 
-/* ===== GLOBAL ===== */
-
-html, body {
-  width:100%;
-  height:100%;
+/* ========== RESET ========== */
+*{box-sizing:border-box}
+html,body{
   margin:0;
   padding:0;
-
-  overscroll-behavior:none;
-  touch-action:none;
+  width:100%;
+  height:100%;
 }
 
-body {
-  font-family: system-ui, Arial, sans-serif;
-  background: linear-gradient(135deg,#f9fafb,#e5ecf4);
+/* ========== THEME ========== */
+body{
+  font-family:system-ui,Arial,sans-serif;
+  background:linear-gradient(135deg,#f9fafb,#e5ecf4);
   transition:.3s;
 }
-
-body.dark {
-  background: linear-gradient(135deg,#1f2933,#111827);
+body.dark{
+  background:linear-gradient(135deg,#1f2933,#111827);
 }
 
-/* ===== APP ===== */
+/* ========== WRAPPER ========== */
+.app-wrapper{
+  min-height:100vh;
+  display:flex;
+  justify-content:center;
+}
+@media(min-width:768px){
+  .app-wrapper{
+    align-items:center;
+    padding:16px;
+  }
+}
 
-.app {
+/* ========== APP ========== */
+.app{
   width:100%;
-  min-height:100dvh;
-
+  min-height:100vh;
+  background:white;
   display:flex;
   flex-direction:column;
-
-  background:white;
 }
-
-body.dark .app {
+body.dark .app{
   background:#1f2933;
   color:#f3f4f6;
 }
+@media(min-width:768px){
+  .app{
+    max-width:420px;
+    min-height:90vh;
+    border-radius:22px;
+    overflow:hidden;
+    box-shadow:0 12px 40px rgba(0,0,0,.15);
+  }
+}
 
-/* ===== HEADER ===== */
-
-.header {
+/* ========== HEADER ========== */
+.header{
   display:grid;
   grid-template-columns:auto 1fr auto auto;
   align-items:center;
   gap:8px;
-
-  padding:12px 14px 6px;
-
-  background:inherit;
+  padding:12px;
 }
-
-.logo { font-size:22px; }
-
-.header h1 {
+.logo{font-size:22px}
+.header h1{
   margin:0;
   font-size:18px;
   text-align:center;
 }
-
-/* Buttons */
-
-.help-btn,
-.theme-btn {
+.help-btn,.theme-btn{
   width:32px;
   height:32px;
   border-radius:50%;
@@ -88,198 +93,151 @@ body.dark .app {
   cursor:pointer;
   color:white;
 }
+.help-btn{background:#3498db}
+.theme-btn{background:#6b7280}
 
-.help-btn { background:#3498db; }
-.theme-btn { background:#6b7280; }
-
-/* ===== PROGRESS ===== */
-
-.progress-wrap {
+/* ========== PROGRESS ========== */
+.progress-wrap{
   height:6px;
   background:#e5e7eb;
   margin:0 14px;
   border-radius:4px;
   overflow:hidden;
 }
-
-body.dark .progress-wrap {
-  background:#374151;
-}
-
-.progress-fill {
+body.dark .progress-wrap{background:#374151}
+.progress-fill{
   height:100%;
   background:linear-gradient(90deg,#34d399,#16a34a);
 }
-
-.info {
+.info,.liked{
   text-align:center;
   font-size:12px;
-  margin:4px 0 2px;
+  margin:2px 0;
 }
+.liked{color:#16a34a;font-weight:bold}
 
-.liked {
-  text-align:center;
-  color:#16a34a;
-  font-weight:bold;
-  font-size:12px;
-}
-
-/* ===== STACK ===== */
-
-.stack {
+/* ========== STACK ========== */
+.stack{
   flex:1;
-
   position:relative;
-
   margin:6px 0;
-
-  min-height:300px;
 }
 
-/* ===== CARD ===== */
-
-.card {
+/* ========== CARD ========== */
+.card{
   position:absolute;
   top:0;
   left:4%;
   width:92%;
   height:100%;
-
   border-radius:20px;
   overflow:hidden;
-
-  background:white;
-
+  background:#eee;
   cursor:grab;
-
   transition:.25s;
+  touch-action:none;
 }
-
-body.dark .card {
-  background:#111827;
-}
-
-.card.dragging {
+body.dark .card{background:#111827}
+.card.dragging{
   transition:none;
   cursor:grabbing;
 }
-
-.card img {
+.card img{
   width:100%;
   height:100%;
   object-fit:cover;
   pointer-events:none;
-
-  -webkit-user-drag:none;
 }
-
-/* Depth */
-
 .stack .card:nth-last-child(2){
   transform:scale(.97) translateY(8px);
 }
-
 .stack .card:nth-last-child(3){
   transform:scale(.94) translateY(16px);
 }
 
-/* Fly */
-
-.card.fly-right {
-  transform:translateX(120%) rotate(20deg)!important;
-  opacity:0;
-}
-
-.card.fly-left {
-  transform:translateX(-120%) rotate(-20deg)!important;
-  opacity:0;
-}
-
-/* ===== EMOJI ===== */
-
-.label {
+/* ========== EMOJI ========== */
+.label{
   position:absolute;
   top:50%;
   left:50%;
   transform:translate(-50%,-50%);
   font-size:52px;
   opacity:0;
-  pointer-events:none;
   transition:.2s;
 }
 
-/* ===== ACTION BAR ===== */
+/* ========== TINDER BUTTONS ========== */
 
-.action-bar {
+.action-bar{
   display:flex;
   justify-content:center;
-  gap:22px;
-
-  padding:8px 0 14px;
+  gap:26px;
+  padding:14px 0 20px;
 }
 
-/* Tinder Style Buttons */
-
-.action-btn {
-  width:66px;
-  height:66px;
+.action-btn{
+  width:64px;
+  height:64px;
   border-radius:50%;
-  border:none;
+  border:2px solid #e5e7eb;
+  background:white;
   font-size:26px;
   cursor:pointer;
-
   display:flex;
   align-items:center;
   justify-content:center;
-
-  background:white;
-  box-shadow:0 6px 14px rgba(0,0,0,.2);
-
-  transition:.15s;
+  box-shadow:0 6px 14px rgba(0,0,0,.15);
+  transition:transform .12s, box-shadow .12s;
 }
 
-.action-btn:active {
-  transform:scale(.9);
+.action-btn:active{
+  transform:scale(.88);
+  box-shadow:0 3px 6px rgba(0,0,0,.15);
 }
 
-.btn-like {
-  background:linear-gradient(135deg,#34d399,#16a34a);
-  color:white;
+/* Like */
+.btn-like{
+  color:#16a34a;
+  border-color:#34d399;
+  box-shadow:
+    0 0 0 4px rgba(52,211,153,.15),
+    0 6px 14px rgba(0,0,0,.15);
 }
 
-.btn-dislike {
-  background:linear-gradient(135deg,#fb7185,#e11d48);
-  color:white;
+/* Dislike */
+.btn-dislike{
+  color:#e11d48;
+  border-color:#fb7185;
+  box-shadow:
+    0 0 0 4px rgba(251,113,133,.15),
+    0 6px 14px rgba(0,0,0,.15);
 }
 
-.btn-undo {
-  background:linear-gradient(135deg,#d1d5db,#9ca3af);
+/* Undo */
+.btn-undo{
+  color:#6b7280;
+  border-color:#d1d5db;
 }
 
-/* ===== SUMMARY ===== */
-
-.summary {
+/* ========== SUMMARY ========== */
+.summary{
+  flex:1;
   padding:20px;
   text-align:center;
+  overflow-y:auto;
+  -webkit-overflow-scrolling:touch;
 }
-
-.summary-grid {
+.summary-grid{
   display:grid;
   grid-template-columns:repeat(2,1fr);
   gap:10px;
   margin:14px 0;
 }
-
-@media(max-width:480px){
-  .summary-grid{grid-template-columns:1fr}
-}
-
-.summary-grid img {
+.summary-grid img{
   width:100%;
   border-radius:12px;
 }
-
-.primary-btn {
+.primary-btn{
   width:100%;
   padding:12px;
   border:none;
@@ -288,9 +246,8 @@ body.dark .card {
   color:white;
 }
 
-/* ===== HELP ===== */
-
-.help-overlay {
+/* ========== HELP ========== */
+.help-overlay{
   position:fixed;
   inset:0;
   background:rgba(0,0,0,.6);
@@ -299,8 +256,7 @@ body.dark .card {
   align-items:center;
   z-index:999;
 }
-
-.help-modal {
+.help-modal{
   background:white;
   padding:18px;
   border-radius:14px;
@@ -308,13 +264,11 @@ body.dark .card {
   max-width:300px;
   text-align:center;
 }
-
-body.dark .help-modal {
+body.dark .help-modal{
   background:#111827;
   color:white;
 }
-
-.help-close {
+.help-close{
   margin-top:10px;
   padding:8px 12px;
   background:#3498db;
@@ -323,17 +277,15 @@ body.dark .help-modal {
   border-radius:8px;
 }
 
-/* ===== FOOTER ===== */
-
-.footer-credit {
+/* ========== FOOTER ========== */
+.footer-credit{
   position:fixed;
   bottom:8px;
   left:10px;
   font-size:11px;
   color:#6b7280;
 }
-
-body.dark .footer-credit {
+body.dark .footer-credit{
   color:#9ca3af;
 }
 
@@ -342,7 +294,10 @@ body.dark .footer-credit {
 
 <body>
 
-<div id="root"></div>
+<div class="app-wrapper">
+  <div id="root"></div>
+</div>
+
 <div class="footer-credit">by Lia</div>
 
 <script type="text/babel">
@@ -360,22 +315,18 @@ function App(){
 
   const [showHelp,setShowHelp]=React.useState(false);
   const [flash,setFlash]=React.useState(null);
+
   const [dark,setDark]=React.useState(false);
 
   const startRef=React.useRef(0);
 
   const topCat=cats[cats.length-1];
 
-  /* Lock */
+  /* Dark Mode */
 
   React.useEffect(()=>{
-
-    document.body.className=dark?"dark":"";
-
-    document.body.style.overflow=
-      showHelp?"hidden":"";
-
-  },[dark,showHelp]);
+    document.body.classList.toggle("dark",dark);
+  },[dark]);
 
   /* Load */
 
@@ -420,40 +371,9 @@ function App(){
 
   },[topCat]);
 
-  /* Global Drag */
-
-  React.useEffect(()=>{
-
-    function handleMove(e){
-
-      if(e.cancelable) e.preventDefault();
-
-      move(e);
-    }
-
-    function handleEnd(){ end(); }
-
-    window.addEventListener("mousemove",handleMove);
-    window.addEventListener("mouseup",handleEnd);
-
-    window.addEventListener("touchmove",handleMove,{passive:false});
-    window.addEventListener("touchend",handleEnd);
-
-    return()=>{
-
-      window.removeEventListener("mousemove",handleMove);
-      window.removeEventListener("mouseup",handleEnd);
-
-      window.removeEventListener("touchmove",handleMove);
-      window.removeEventListener("touchend",handleEnd);
-    };
-
-  },[drag]);
-
-  /* Emoji */
+  /* Swipe */
 
   function flashEmoji(dir){
-
     setFlash(dir);
     setTimeout(()=>setFlash(null),180);
   }
@@ -467,8 +387,6 @@ function App(){
     flashEmoji("left");
     swipe("left");
   }
-
-  /* Swipe */
 
   function swipe(dir){
 
@@ -506,8 +424,6 @@ function App(){
     setCats([]);
     setLiked([]);
     setHistory([]);
-    setDrag({x:0,active:false});
-    setFlash(null);
 
     setLoading(true);
 
@@ -554,7 +470,6 @@ function App(){
   return(
     <div className="app">
 
-      {/* Header */}
       <div className="header">
 
         <span className="logo">😺</span>
@@ -585,13 +500,8 @@ function App(){
           />
         </div>
 
-        <div className="info">
-          {progress}/{TOTAL}
-        </div>
-
-        <div className="liked">
-          ❤️ {liked.length}
-        </div>
+        <div className="info">{progress}/{TOTAL}</div>
+        <div className="liked">❤️ {liked.length}</div>
       </>
       )}
 
@@ -615,15 +525,17 @@ function App(){
           return(
             <div
               key={cat}
-              className={`card
-                ${top&&drag.active?"dragging":""}
-                ${top&&flash==="right"?"fly-right":""}
-                ${top&&flash==="left"?"fly-left":""}
-              `}
+              className={`card ${top&&drag.active?"dragging":""}`}
               style={{zIndex:i,...style}}
 
               onMouseDown={top?start:null}
+              onMouseMove={top?move:null}
+              onMouseUp={top?end:null}
+              onMouseLeave={top?end:null}
+
               onTouchStart={top?start:null}
+              onTouchMove={top?move:null}
+              onTouchEnd={top?end:null}
             >
 
               <img src={cat} alt="Cat"/>
@@ -693,7 +605,6 @@ function App(){
       </div>
       )}
 
-      {/* Help */}
       {showHelp&&(
         <div
           className="help-overlay"
@@ -709,7 +620,7 @@ function App(){
             <p>👉 Swipe Right = Like ❤️</p>
             <p>👈 Swipe Left = Dislike ❌</p>
             <p>⌨️ Arrow Keys</p>
-            <p>🌙 D = Dark Mode</p>
+            <p>🌙 D = Toggle Dark</p>
             <p>↩️ Z = Undo</p>
 
             <button
@@ -734,6 +645,8 @@ ReactDOM
 </script>
 </body>
 </html>
+
+
 
 
 
